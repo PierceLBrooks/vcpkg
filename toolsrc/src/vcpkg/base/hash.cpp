@@ -7,7 +7,7 @@
 #include <vcpkg/base/uint128.h>
 #include <vcpkg/base/util.h>
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
 #include <bcrypt.h>
 #pragma comment(lib, "bcrypt")
 
@@ -98,7 +98,7 @@ namespace vcpkg::Hash
 
     namespace
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         BCRYPT_ALG_HANDLE get_alg_handle(LPCWSTR algorithm_identifier) noexcept
         {
             BCRYPT_ALG_HANDLE result;
@@ -611,7 +611,7 @@ namespace vcpkg::Hash
 
     std::unique_ptr<Hasher> get_hasher_for(Algorithm algo) noexcept
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         return std::make_unique<BCryptHasher>(algo);
 #else
         switch (algo)
@@ -627,7 +627,7 @@ namespace vcpkg::Hash
     template<class F>
     static std::string do_hash(Algorithm algo, const F& f) noexcept
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         auto hasher = BCryptHasher(algo);
         return f(hasher);
 #else

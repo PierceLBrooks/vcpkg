@@ -7,8 +7,9 @@
 #include <vcpkg/base/system.process.h>
 #include <vcpkg/base/util.h>
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) || !defined(_MSC_VER)
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -30,7 +31,7 @@ namespace vcpkg::Files
         {
             using fs::file_type;
             using fs::perms;
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             WIN32_FILE_ATTRIBUTE_DATA file_attributes;
             auto ft = file_type::unknown;
             auto permissions = perms::unknown;
@@ -104,7 +105,7 @@ namespace vcpkg::Files
         // does _not_ follow symlinks
         void set_writeable(const fs::path& path, std::error_code& ec) noexcept
         {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             auto const file_name = path.c_str();
             WIN32_FILE_ATTRIBUTE_DATA attributes;
             if (!GetFileAttributesExW(file_name, GetFileExInfoStandard, &attributes))
@@ -518,7 +519,7 @@ namespace vcpkg::Files
         {
             this->rename(oldpath, newpath, ec);
             Util::unused(temp_suffix);
-#if !defined(_WIN32)
+#if !defined(_WIN32) && defined(_MSC_VER)
             if (ec)
             {
                 auto dst = newpath;
@@ -633,7 +634,7 @@ namespace vcpkg::Files
                             do_remove(entry, err);
                             if (err.ec) return;
                         }
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
                         if (!RemoveDirectoryW(current_path.c_str()))
                         {
                             ec.assign(GetLastError(), std::system_category());
@@ -652,7 +653,7 @@ namespace vcpkg::Files
                         if (check_ec(ec, current_path, err)) return;
                     }
 #else // ^^^ VCPKG_USE_STD_FILESYSTEM // !VCPKG_USE_STD_FILESYSTEM vvv
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
                     else if (path_type == fs::file_type::directory_symlink)
                     {
                         if (!RemoveDirectoryW(current_path.c_str()))
@@ -815,7 +816,7 @@ namespace vcpkg::Files
             ec.clear();
 
             FILE* f = nullptr;
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             auto err = _wfopen_s(&f, file_path.native().c_str(), L"wb");
 #else  // ^^^ defined(_WIN32) // !defined(_WIN32) vvv
             f = fopen(file_path.native().c_str(), "wb");
@@ -844,7 +845,7 @@ namespace vcpkg::Files
 #if VCPKG_USE_STD_FILESYSTEM
             return fs::stdfs::absolute(path, ec);
 #else // ^^^ VCPKG_USE_STD_FILESYSTEM  / !VCPKG_USE_STD_FILESYSTEM  vvv
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             // absolute was called system_complete in experimental filesystem
             return fs::stdfs::system_complete(path, ec);
 #else  // ^^^ defined(_WIN32) / !defined(_WIN32) vvv
@@ -882,7 +883,7 @@ namespace vcpkg::Files
             {
             }
 
-#if defined(WIN32)
+#if defined(WIN32) && defined(_MSC_VER)
             void assign_busy_error(std::error_code& ec) { ec.assign(ERROR_BUSY, std::system_category()); }
 
             bool operator()(std::error_code& ec)
@@ -1001,7 +1002,7 @@ namespace vcpkg::Files
 
         virtual void unlock_file_lock(fs::SystemHandle handle, std::error_code& ec) override
         {
-#if defined(WIN32)
+#if defined(WIN32) && defined(_MSC_VER)
             if (CloseHandle(reinterpret_cast<HANDLE>(handle.system_handle)) == 0)
             {
                 ec.assign(GetLastError(), std::system_category());
@@ -1016,7 +1017,7 @@ namespace vcpkg::Files
 
         virtual std::vector<fs::path> find_from_PATH(const std::string& name) const override
         {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             static constexpr StringLiteral EXTS[] = {".cmd", ".exe", ".bat"};
             auto paths = Strings::split(System::get_environment_variable("PATH").value_or_exit(VCPKG_LINE_INFO), ';');
 #else  // ^^^ defined(_WIN32) // !defined(_WIN32) vvv

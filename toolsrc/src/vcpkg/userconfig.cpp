@@ -11,7 +11,7 @@ namespace vcpkg
 {
     fs::path get_user_dir()
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         return System::get_appdata_local().value_or_exit(VCPKG_LINE_INFO) / "vcpkg";
 #else
         auto maybe_home = System::get_environment_variable("HOME");

@@ -6,13 +6,13 @@
 #include <vcpkg/base/system.process.h>
 #include <vcpkg/base/util.h>
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
 #include <VersionHelpers.h>
 #endif
 
 namespace vcpkg::Downloads
 {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
     static void winhttp_download_file(Files::Filesystem& fs,
                                       ZStringView target_file_path,
                                       StringView hostname,
@@ -179,7 +179,7 @@ namespace vcpkg::Downloads
         std::error_code ec;
         fs.remove(download_path, ec);
         fs.remove(download_path_part_path, ec);
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         auto url_no_proto = url.substr(8); // drop https://
         auto path_begin = Util::find(url_no_proto, '/');
         std::string hostname(url_no_proto.begin(), path_begin);

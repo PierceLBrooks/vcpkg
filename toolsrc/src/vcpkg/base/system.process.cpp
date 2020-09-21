@@ -137,8 +137,13 @@ namespace vcpkg
     fs::path System::get_exe_path_of_current_process()
     {
 #if defined(_WIN32)
+#if defined(_MSC_VER)
         wchar_t buf[_MAX_PATH];
         const int bytes = GetModuleFileNameW(nullptr, buf, _MAX_PATH);
+#else
+        wchar_t buf[MAX_PATH];
+        const int bytes = GetModuleFileNameW(nullptr, buf, MAX_PATH);
+#endif
         if (bytes == 0) std::abort();
         return fs::path(buf, buf + bytes);
 #elif defined(__APPLE__)
@@ -485,7 +490,7 @@ namespace vcpkg
         {
             CloseHandle(child_stdin);
 
-            unsigned long bytes_read = 0;
+            unsigned int bytes_read = 0;
             static constexpr int buffer_size = 1024 * 32;
             auto buf = std::make_unique<char[]>(buffer_size);
             while (ReadFile(child_stdout, (void*)buf.get(), buffer_size, &bytes_read, nullptr) && bytes_read > 0)

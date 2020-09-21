@@ -99,6 +99,7 @@ endif()
 if (MINGW)
     add_compile_definitions(
         UNICODE
+        _WIN32
         _WIN32_WINNT=0x0601
         WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY=4
         __fastfail=exit)

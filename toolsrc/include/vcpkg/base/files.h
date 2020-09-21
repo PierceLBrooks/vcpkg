@@ -24,7 +24,7 @@ namespace fs
     using stdfs::perms;
     using stdfs::u8path;
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
     enum class file_type
     {
         none = 0,
@@ -91,7 +91,7 @@ namespace fs
 
     inline bool is_symlink(file_status s) noexcept
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         if (s.type() == file_type::directory_symlink) return true;
 #endif
         return s.type() == file_type::symlink;

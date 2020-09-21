@@ -13,7 +13,7 @@ namespace vcpkg::Chrono
 
     static std::time_t utc_mktime(tm* time_ptr)
     {
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         return _mkgmtime(time_ptr);
 #else
         return timegm(time_ptr);
@@ -23,7 +23,7 @@ namespace vcpkg::Chrono
     static tm to_local_time(const std::time_t& t)
     {
         tm parts{};
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         localtime_s(&parts, &t);
 #else
         parts = *localtime(&t);
@@ -34,7 +34,7 @@ namespace vcpkg::Chrono
     static Optional<tm> to_utc_time(const std::time_t& t)
     {
         tm parts{};
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         const errno_t err = gmtime_s(&parts, &t);
         if (err)
         {
@@ -137,7 +137,7 @@ namespace vcpkg::Chrono
     {
         CTime ret;
         const auto assigned =
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
             sscanf_s
 #else
             sscanf

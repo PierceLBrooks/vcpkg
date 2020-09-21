@@ -14,7 +14,7 @@ namespace vcpkg::Strings::details
 
     static bool icase_eq(char a, char b) { return tolower_char{}(a) == tolower_char{}(b); }
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
     static _locale_t& c_locale()
     {
         static _locale_t c_locale_impl = _create_locale(LC_ALL, "C");
@@ -27,7 +27,7 @@ namespace vcpkg::Strings::details
         va_list args;
         va_start(args, fmtstr);
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         const int sz = _vscprintf_l(fmtstr, c_locale(), args);
 #else
         const int sz = vsnprintf(nullptr, 0, fmtstr, args);
@@ -36,7 +36,7 @@ namespace vcpkg::Strings::details
 
         std::string output(sz, '\0');
 
-#if defined(_WIN32)
+#if defined(_WIN32) && defined(_MSC_VER)
         _vsnprintf_s_l(&output.at(0), output.size() + 1, output.size(), fmtstr, c_locale(), args);
 #else
         va_start(args, fmtstr);
